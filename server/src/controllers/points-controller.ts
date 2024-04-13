@@ -64,7 +64,7 @@ export class PointsController {
 		const trx = await knex.transaction()
 
 		const point = {
-			image: `market.webp`,
+			image: request.file?.filename,
 			name,
 			email,
 			whatsapp,
@@ -76,12 +76,12 @@ export class PointsController {
 
 		const [point_id] = await trx('points').insert(point)
 
-		const pointItems = items.map((item_id: number) => {
-			return {
-				item_id,
-				point_id,
-			}
-		})
+		const pointItems = items
+			.split(',')
+			.map((item: string) => Number(item.trim()))
+			.map((item_id: number) => {
+				return { item_id, point_id }
+			})
 
 		await trx('point_items').insert(pointItems)
 
