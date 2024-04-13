@@ -18,7 +18,12 @@ export class PointsController {
 			.distinct()
 			.select('points.*')
 
-		return response.json(points)
+		return response.json(points.map(point => {
+			return {
+				...point,
+				image_url: `${process.env.UPLOADS_URL}/${point.image}`
+			}
+		}))
 	}
 
 	async show(request: Request, response: Response) {
@@ -35,7 +40,13 @@ export class PointsController {
 			.where('point_items.point_id', id)
 			.select('items.title')
 
-		return response.json({ point, items })
+		return response.json({
+			point: {
+				...point,
+				image_url: `${process.env.UPLOADS_URL}/${point.image}`
+			},
+			items
+		})
 	}
 
 	async create(request: Request, response: Response) {
@@ -53,7 +64,7 @@ export class PointsController {
 		const trx = await knex.transaction()
 
 		const point = {
-			image: 'http://localhost:3333/uploads/market.webp',
+			image: `market.webp`,
 			name,
 			email,
 			whatsapp,
