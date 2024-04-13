@@ -8,6 +8,7 @@ import { LeafletMouseEvent } from 'leaflet'
 import './styles.css'
 import logo from '../../assets/logo.svg'
 import { api } from '../../services/api'
+import { Dropzone } from '../../components/Dropzone'
 
 interface Item {
 	id: number
@@ -39,6 +40,7 @@ export function CreatePoint() {
 	const [selectedCity, setSelectedCity] = useState('0')
 	const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0])
 	const [selectedItems, setSelectedItems] = useState<number[]>([])
+	const [selectedFile, setSelectedFile] = useState<File>()
 
 	const navigate = useNavigate()
 
@@ -104,15 +106,19 @@ export function CreatePoint() {
 	async function handleSubmit(event: FormEvent) {
 		event.preventDefault()
 
-		const data = {
-			name: formData.name,
-			email: formData.email,
-			whatsapp: formData.whatsapp,
-			uf: selectedUf,
-			city: selectedCity,
-			latitude: selectedPosition[0],
-			longitude: selectedPosition[1],
-			items: selectedItems
+		const data = new FormData()
+
+		data.append('name', formData.name)
+		data.append('email', formData.email)
+		data.append('whatsapp', formData.whatsapp)
+		data.append('uf', selectedUf)
+		data.append('city', selectedCity)
+		data.append('latitude', String(selectedPosition[0]))
+		data.append('longitude', String(selectedPosition[1]))
+		data.append('items', selectedItems.join(','))
+
+		if (selectedFile) {
+			data.append('image', selectedFile)
 		}
 
 		await api.post('/points', data)
@@ -134,6 +140,8 @@ export function CreatePoint() {
 
 			<form onSubmit={handleSubmit}>
 				<h1>Cadastro do <br /> ponto de coleta</h1>
+
+				<Dropzone onFileUploaded={setSelectedFile} />
 
 				<fieldset>
 					<legend>
